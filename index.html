@@ -1,68 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Donut Chart</title>
-  <!-- Plotly.js từ CDN -->
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> <!-- :contentReference[oaicite:5]{index=5} -->
+  <title>Donut Chart Đẹp & Mượt</title>
+  <!-- Plotly -->
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <style>
-    #chart {
-      width: 100%;
-      max-width: 600px;
-      height: 400px;
-      margin: 40px auto;
+    #chart{
+      width:100%;
+      max-width:600px;
+      height:400px;
+      margin:40px auto;
     }
   </style>
 </head>
 <body>
   <div id="chart"></div>
+
   <script>
-    // Dữ liệu
+    /* =========================  DỮ LIỆU  ========================= */
     const labels = ['Open', 'In Analyse'];
     const values = [43, 31];
+    const total  = values.reduce((s,v) => s + v, 0);
 
-    // Trace donut cơ bản
+    /* =========================  TRACE  =========================== */
+    const basePull = labels.map(() => 0);        // mảng pull gốc
     const trace = {
       type: 'pie',
       labels,
       values,
-      hole: 0.5,
-      pull: [0, 0],                    // default: không pull
-      textinfo: 'percent',             // hiển thị % bên trong
-      hoverinfo: 'label+value+percent',// hover hiển thị label, value, percent
-      textposition: 'inside'
+      hole : 0.55,
+      pull : basePull.slice(),                   // clone để giữ nguyên gốc
+      textinfo    : 'percent',
+      hoverinfo   : 'label+value+percent',
+      textposition: 'inside',
+      sort        : false,
+      // marker: { colors: ['#4CAF50', '#2196F3'] } // → đổi màu nếu muốn
     };
 
+    /* =========================  LAYOUT  ========================== */
     const layout = {
-      margin: { t: 50, b: 20, l: 20, r: 20 },
-      annotations: []                  // mặc định không có annotation
+      margin : {t:40, r:20, b:20, l:20},
+      showlegend : true,
+      annotations: [{
+        x:0.5, y:0.5,
+        text : `Total<br><b>${total}</b>`,
+        font : {size:20},
+        showarrow:false
+      }],
+      transition: {duration:300, easing:'cubic-in-out'}
     };
 
-    Plotly.newPlot('chart', [trace], layout, {responsive: true});
-
+    /* =========================  VẼ  ============================== */
     const chart = document.getElementById('chart');
+    Plotly.newPlot(chart, [trace], layout, {responsive:true, displayModeBar:false});
 
-    // Khi hover: pull slice và thêm annotation
-    chart.on('plotly_hover', function(eventData) {
-      const pt = eventData.points[0];
-      const updatePull = { 'pull': [0, 0] };
-      updatePull.pull[pt.pointNumber] = 0.1;  // pull 10% lát hover
-      Plotly.restyle(chart, updatePull);      // :contentReference[oaicite:6]{index=6}
+    /* =========================  HOVER  =========================== */
+    chart.on('plotly_hover', e => {
+      const pt = e.points[0];
 
-      const newAnn = [{
-        text: `${pt.value}<br>${(pt.percent*100).toFixed(2)}%`,
-        x: 0.5, y: 0.5,
-        showarrow: false,
-        font: { size: 20 }
-      }];
-      Plotly.relayout(chart, {annotations: newAnn});
+      /* Kéo slice ra 7 % bán kính */
+      const newPull = basePull.slice();
+      newPull[pt.pointNumber] = 0.07;
+      Plotly.restyle(chart, {'pull':[newPull]}, [0]);
+
+      /* Đổi annotation: label – value – % */
+      Plotly.relayout(chart, {
+        'annotations[0].text':
+          `${pt.label}<br><b>${pt.value}</b><br>${(pt.percent*100).toFixed(1)} %`
+      });
     });
 
-    // Khi unhover: reset pull và xóa annotation
-    chart.on('plotly_unhover', function() {
-      Plotly.restyle(chart, {'pull': [0, 0]});  // reset pull :contentReference[oaicite:7]{index=7}
-      Plotly.relayout(chart, {annotations: []}); // xóa annotation :contentReference[oaicite:8]{index=8}
+    /* =========================  UN-HOVER  ======================== */
+    chart.on('plotly_unhover', () => {
+      Plotly.restyle(chart, {'pull':[basePull]}, [0]);
+      Plotly.relayout(chart, {
+        'annotations[0].text': `Total<br><b>${total}</b>`
+      });
     });
   </script>
 </body>
