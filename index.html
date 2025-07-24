@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Pie Chart</title>
+  <!-- 1. Nhúng Plotly.js từ CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script> <!-- :contentReference[oaicite:0]{index=0} -->
+
+  <!-- 2. CSS cơ bản để căn giữa và set kích thước -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    #chart {
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      margin: 40px auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- 3. Container cho pie chart -->
+  <div id="chart"></div>
+
+  <!-- 4. JavaScript: dữ liệu + cấu hình -->
+  <script>
+    // 4.1. Dữ liệu ví dụ: Status & số lượng issue
+    var data = [{
+      values: [43, 31],
+      labels: ['Open', 'In Analyse'],
+      type: 'pie',
+      hoverinfo: 'label+value+percent',     // hiện label, value, percent khi hover :contentReference[oaicite:1]{index=1}
+      textinfo: 'percent+label',            // hiển thị phần trăm + tên trong lát
+      textposition: 'inside'
+    }];
+
+    // 4.2. Cấu hình layout
+    var layout = {
+      title: 'Issue Status Distribution',
+      margin: { t: 50, b: 20, l: 20, r: 20 }
+    };
+
+    // 4.3. Vẽ chart, với responsive để thích nghi mọi kích thước màn hình
+    Plotly.newPlot('chart', data, layout, {responsive: true});  /* :contentReference[oaicite:2]{index=2} */
+  </script>
+</body>
+</html>
